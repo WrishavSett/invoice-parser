@@ -1,0 +1,184 @@
+================================================================================
+INVOICE PROCESSING REPORT
+================================================================================
+
+SUMMARY
+--------------------------------------------------------------------------------
+Total Validation Checks: 44
+Passed: 44
+Failed: 0
+Success Rate: 100.00%
+
+VALIDATION RESULTS BY SECTION
+--------------------------------------------------------------------------------
+
+LETTER HEAD
+  Passes:
+    ✓ Company name is present and matches the expected value.
+    ✓ Former company name is present and matches the expected value.
+    ✓ GSTIN is present and format is valid.
+    ✓ Email ID is present and matches the expected value.
+    ✓ Website is present and matches the expected value.
+  Errors:
+    (None)
+
+TAX INVOICE
+  Passes:
+    ✓ PAN number is present and format is valid.
+    ✓ TAN number is present and format is valid.
+  Errors:
+    (None)
+
+BILL TO
+  Passes:
+    ✓ Company name is present in bill-to details.
+    ✓ Address is present in bill-to details.
+    ✓ GSTIN is present and format is valid in bill-to details.
+    ✓ PAN number is present and format is valid in bill-to details.
+    ✓ TAN number is present and format is valid in bill-to details.
+    ✓ Place of supply is present in bill-to details.
+    ✓ IRN number is present and format is valid in bill-to details.
+  Errors:
+    (None)
+
+INVOICE
+  Passes:
+    ✓ Date is present and format is valid in invoice details.
+    ✓ Invoice number is present in invoice details.
+    ✓ Service month is present in invoice details.
+    ✓ Lower TDS certificate number key is present in invoice details.
+  Errors:
+    (None)
+
+RESOURCE AND BILL
+  Passes:
+    ✓ Resource and bill details list has line items.
+    ✓ Serial number is present.
+    ✓ Resource name is present.
+    ✓ HSN/SAC is present.
+    ✓ PO number is present.
+    ✓ Bill rate is present.
+    ✓ Ericsson invoice code is present.
+    ✓ Taxable value is present.
+    ✓ CGST is present.
+    ✓ SGST is present.
+    ✓ IGST is present.
+    ✓ Total INR is present.
+    ✓ Total invoice value in INR is present.
+    ✓ Total invoice value in words is present.
+    ✓ Computed line-item total matches the sum of taxable value and taxes.
+    ✓ Line-item total INR matches invoice-level total INR.
+    ✓ Invoice total amount in words matches the numeric total INR.
+  Errors:
+    (None)
+
+NOTE
+  Passes:
+    ✓ Note point 1 is present and valid.
+    ✓ Note point 2 is present and valid.
+    ✓ Post script is present and valid.
+  Errors:
+    (None)
+
+BENEFICIARY
+  Passes:
+    ✓ Beneficiary name is present.
+    ✓ Account number is present.
+    ✓ IFSC code is present.
+    ✓ Country is present.
+  Errors:
+    (None)
+
+QR CODE
+  Passes:
+    ✓ QR code is present and valid.
+  Errors:
+    (None)
+
+DIGITAL SIGNATURE
+  Passes:
+    ✓ Digital signature is present and valid.
+  Errors:
+    (None)
+
+================================================================================
+EXTRACTED DATA
+================================================================================
+
+{
+  "letter_head": {
+    "company_name": "Genius HRTech Limited",
+    "former_company_name": "(Formerly known as Genius Consultants Limited)",
+    "address": "Synthesis Business Park Tower,1C, 1st Floor, CBD/1,Action Area II. New Town,Kolkata- 700157.",
+    "cin": "U74140WB1993PLC059586",
+    "gstin": "19AABCG1661M1ZE",
+    "phone": "033-66415800/01",
+    "email": "enquiry@geniushrtech.com",
+    "website": "www.geniushrtech.com"
+  },
+  "tax_invoice": {
+    "pan_no": "AABCG1661M",
+    "tan_no": "CALG02952F"
+  },
+  "bill_to_details": {
+    "company_name": "ERICSSON INDIA PRIVATE LIMITED",
+    "address": "Grd To 14th Floor Block A, ASF INSIGNIA, KINGS CANYON ASF INSIGNIA, Ground Floor Block B Kings Canyon, GAWAL PAHARI, Gurugram, Gurugram, Haryana, 122003 , GURGAON, HARYANA 122003",
+    "gstin": "06AACCE4175D2ZX",
+    "pan_no": "AACCE4175D",
+    "tan_no": "DELE05521F",
+    "place_of_supply": "HARYANA-06",
+    "irn_no": "9b4667d2ede02b76ae490c45065fc3c2ae0feb55c3ca836733dfa18ff024b7d7"
+  },
+  "invoice_details": {
+    "date": "17 Nov 2025",
+    "invoice_no": "GWBIRM/NV0013/26",
+    "service_month": "October,2025",
+    "lower_tds_cert_no": "1AB0325BHZ"
+  },
+  "resource_and_bill_details": [
+    {
+      "sl_no": "1",
+      "resource_name": "HEISNAM SHIBANANDA",
+      "hsn_sac": "998513",
+      "po_no": "8000112653",
+      "bill_rate": "4000.00",
+      "ericsson_invoice_code": "ERCSMI00228103",
+      "taxable_value": "4160.00",
+      "cgst": "",
+      "sgst": "",
+      "igst": "",
+      "total_inr": "4160.00"
+    }
+  ],
+  "total_invoice_value": {
+    "taxable_value": "4160.00",
+    "cgst": "",
+    "sgst": "",
+    "igst": "",
+    "total_inr": "4160.00",
+    "in_words": "Rupees Four Thousand One Hundred Sixty and Paisa Only."
+  },
+  "arn_for_lut": "AD190225017242G",
+  "supply": "Supply to SEZ unit or SEZ Developer for authorized operations under Bond or Letter of undertaking without payment of Integrated Tax.",
+  "igst_foregone": "749.00",
+  "note": {
+    "1": "Please check the calculation/attendance/amount of the bill and inform us within 48 hours in case of any discrepancy, to avoid last minute rush. Any changes reported after 48 hours will be adjusted along with the next month's bill.",
+    "2": "As per the IT rule u/s 194JB, if our Invoices value in a year is more than Rs. 50,000/-, then you may deduct TDS @ 0.50% Excluding GST",
+    "post_script": "For any kind of GST related query, please contact at : gstsupport@geniushrtech.com"
+  },
+  "beneficiary_details": {
+    "beneficiary_name": "Genius HRTech Limited (Formerly known as Genius Consultants Limited)",
+    "bank_name": "HDFC BANK LTD",
+    "address": "2/6 SARAT BOSE ROAD",
+    "reverse_charge": "No",
+    "account_no": "00228640000037",
+    "ifsc_code": "HDFC0000014",
+    "micr_code": "700240099",
+    "country": "India",
+    "authorised_signatory": ""
+  },
+  "qr_code": "True",
+  "digital_signature": "True"
+}
+
+================================================================================

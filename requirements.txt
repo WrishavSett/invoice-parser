@@ -1,0 +1,4 @@
+google-genai==1.61.0
+PyMuPDF==1.26.7
+language-tool-python==3.2.2
+num2words==0.5.14
