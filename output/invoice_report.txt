@@ -122,45 +122,45 @@ EXTRACTED DATA
   },
   "bill_to_details": {
     "company_name": "ERICSSON INDIA PRIVATE LIMITED",
-    "address": "Grd To 14th Floor Block A, ASF INSIGNIA, KINGS CANYON ASF INSIGNIA, Ground Floor Block B Kings Canyon, GAWAL PAHARI, Gurugram, Gurugram, Haryana, 122003 , GURGAON, HARYANA 122003",
-    "gstin": "06AACCE4175D2ZX",
+    "address": "7th Floor, Tower C, World Trade Center,, Opp. EON Free Zone, 1 Kharadi, Dholepatil Farms Rd, MIDC, Knowledge Park, Pune, Pune, Maharashtra, 411014",
+    "gstin": "27AACCE4175D1ZU",
     "pan_no": "AACCE4175D",
     "tan_no": "DELE05521F",
-    "place_of_supply": "HARYANA-06",
-    "irn_no": "9b4667d2ede02b76ae490c45065fc3c2ae0feb55c3ca836733dfa18ff024b7d7"
+    "place_of_supply": "MAHARASHTRA-27",
+    "irn_no": "91277ad8508f3cb8cf96dba584bacbd81168852090f1831eceeb9949958f2a29"
   },
   "invoice_details": {
-    "date": "17 Nov 2025",
-    "invoice_no": "GWBIRM/NV0013/26",
-    "service_month": "October,2025",
+    "date": "06 Feb 2026",
+    "invoice_no": "GWBISA/FB0002/26",
+    "service_month": "January,2026",
     "lower_tds_cert_no": "1AB0325BHZ"
   },
   "resource_and_bill_details": [
     {
       "sl_no": "1",
-      "resource_name": "HEISNAM SHIBANANDA",
+      "resource_name": "SHAILENDRA KUSHWAH",
       "hsn_sac": "998513",
-      "po_no": "8000112653",
-      "bill_rate": "4000.00",
-      "ericsson_invoice_code": "ERCSMI00228103",
-      "taxable_value": "4160.00",
-      "cgst": "",
-      "sgst": "",
-      "igst": "",
-      "total_inr": "4160.00"
+      "po_no": "8000112642",
+      "bill_rate": "51980.00",
+      "ericsson_invoice_code": "ERCSIN01233612",
+      "taxable_value": "51980.00",
+      "cgst": "0.00",
+      "sgst": "0.00",
+      "igst": "9356.40",
+      "total_inr": "61336.40"
     }
   ],
   "total_invoice_value": {
-    "taxable_value": "4160.00",
-    "cgst": "",
-    "sgst": "",
-    "igst": "",
-    "total_inr": "4160.00",
-    "in_words": "Rupees Four Thousand One Hundred Sixty and Paisa Only."
+    "taxable_value": "51980.00",
+    "cgst": "0.00",
+    "sgst": "0.00",
+    "igst": "9356.40",
+    "total_inr": "61336.40",
+    "in_words": "Rupees Sixty One Thousand Three Hundred Thirty Six and Forty Paisa Only."
   },
-  "arn_for_lut": "AD190225017242G",
-  "supply": "Supply to SEZ unit or SEZ Developer for authorized operations under Bond or Letter of undertaking without payment of Integrated Tax.",
-  "igst_foregone": "749.00",
+  "arn_for_lut": "",
+  "supply": "",
+  "igst_foregone": "",
   "note": {
     "1": "Please check the calculation/attendance/amount of the bill and inform us within 48 hours in case of any discrepancy, to avoid last minute rush. Any changes reported after 48 hours will be adjusted along with the next month's bill.",
     "2": "As per the IT rule u/s 194JB, if our Invoices value in a year is more than Rs. 50,000/-, then you may deduct TDS @ 0.50% Excluding GST",
@@ -168,7 +168,7 @@ EXTRACTED DATA
   },
   "beneficiary_details": {
     "beneficiary_name": "Genius HRTech Limited (Formerly known as Genius Consultants Limited)",
-    "bank_name": "HDFC BANK LTD",
+    "bank_name": "HDFC BANK",
     "address": "2/6 SARAT BOSE ROAD",
     "reverse_charge": "No",
     "account_no": "00228640000037",
