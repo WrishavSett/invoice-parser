@@ -352,6 +352,10 @@ class InvoiceValidator:
         igst = 0.00
         total_inr = 0.00
 
+        cgst_percent = 9.0
+        sgst_percent = 9.0
+        igst_percent = 18.0
+
         if len(resource_and_bill) == 0:
             self.errors["resource_and_bill"].append("Resource and bill details list has NO line items.")
         else:
@@ -425,7 +429,7 @@ class InvoiceValidator:
                     self.passes["resource_and_bill"].append("CGST is present.")
 
                 if 'sgst' not in item:
-                    self.errors["resource_and_bill"].append("CGST key is missing.")
+                    self.errors["resource_and_bill"].append("SGST key is missing.")
                 elif 'sgst' in item:
                     if item['sgst'] == '':
                         sgst = 0.00
@@ -468,6 +472,37 @@ class InvoiceValidator:
                 else:
                     total_invoice_value_words = total_invoice_value['in_words']
                 self.passes["resource_and_bill"].append("Total invoice value in words is present.")
+
+            cgst_amt = ((cgst_percent/100.0)*taxable_value)
+            sgst_amt = ((sgst_percent/100.0)*taxable_value)
+            igst_amt = ((igst_percent/100.0)*taxable_value)
+
+            if igst != 0.00:
+                if cgst == 0.00 and sgst == 0.00:
+                    if igst == igst_amt:
+                        self.passes["resource_and_bill"].append(f"IGST is {igst} and correctly calculated at 18%. CGST and SGST are NIL.")
+                    elif igst != igst_amt:
+                        self.errors["resource_and_bill"].append(f"IGST is {igst} and incorrectly calculated. CGST and SGST are NIL.")
+                elif cgst != 0.00 and sgst == 0.00:
+                    self.errors["resource_and_bill"].append("IGST and CGST are both being charged.")
+                elif cgst == 0.00 and sgst != 0.00:
+                    self.errors["resource_and_bill"].append("IGST and SGST are both being charged.")
+                elif cgst != 0.00 and sgst != 0.00:
+                    self.errors["resource_and_bill"].append("IGST, CGST and SGST are all being charged.")
+            elif igst == 0.00:
+                if cgst != 0.00 and sgst != 0.00:
+                    if cgst == cgst_amt and sgst == sgst_amt:
+                        self.passes["resource_and_bill"].append(f"CGST is {cgst }and SGST is {sgst} and are correctly calculated at 9% each. IGST is NIL.")
+                    elif cgst != cgst_amt and sgst == sgst_amt:
+                        self.errors["resource_and_bill"].append(f"CGST is {cgst} and incorrectly calculated. CGST should be {cgst_amt}.")
+                    elif cgst == cgst_amt and sgst != sgst_amt:
+                        self.errors["resource_and_bill"].append(f"SGST is {sgst} and incorrectly calculated. SGST should be {sgst_amt}.")
+                elif cgst == 0.00 and sgst != 0.00:
+                    self.errors["resource_and_bill"].append("CGST is NIL. Should be calculated at 9% since IGST is NIL.")
+                elif cgst != 0.00 and sgst == 0.00:
+                    self.errors["resource_and_bill"].append("SGST is NIL. Should be calculated at 9% since IGST is NIL.")
+                elif cgst == 0.00 and sgst == 0.00:
+                    self.errors["resource_and_bill"].append("IGST, CGST and SGST are all NIL.")
 
             if total_inr != (taxable_value + cgst + sgst + igst):
                 self.errors["resource_and_bill"].append("Computed line-item total does not match the sum of taxable value and taxes.")
