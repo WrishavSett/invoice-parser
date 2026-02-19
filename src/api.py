@@ -26,7 +26,7 @@ Example API Calls:
     
     # Process invoice
     curl -X POST http://localhost:8000/process-invoice \
-         -F "file=@invoice.jpg"
+         -F "file=@invoice.pdf"
 """
 
 import os
