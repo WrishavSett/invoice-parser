@@ -7,10 +7,10 @@ the extraction of invoice data from images using AI, validates the extracted dat
 against business rules, and generates detailed validation reports.
 
 Usage:
-    python main.py <path_to_invoice_image>
+    python main.py <path_to_invoice_pdf>
     
 Example:
-    python main.py invoices/invoice_001.jpg
+    python main.py invoices/invoice_001.pdf
 """
 
 import sys
@@ -21,6 +21,7 @@ from typing import Dict, Any
 
 from gemini_client import GeminiClient
 from validator import InvoiceValidator
+from helper import pdf_to_png_images, are_pdf_pages_blank
 
 
 class InvoiceProcessor:
@@ -52,26 +53,92 @@ class InvoiceProcessor:
         
         self.validator = InvoiceValidator()
     
-    def extract_data(self, image_path: str) -> Dict[str, Any]:
+    def _validate_pdf(self, pdf_path: str):
         """
-        Extract structured data from an invoice image.
-        
+        Validate the structural integrity of the invoice PDF.
+
+        Rules enforced:
+            1. The PDF must contain exactly 1 page.
+            2. The first (and only) page must not be blank.
+
         Args:
-            image_path (str): Path to the invoice image file.
-        
+            pdf_path (str): Path to the PDF file on disk.
+
+        Raises:
+            ValueError: If the PDF has more than one page.
+            ValueError: If the first page is blank.
+        """
+        pages = pdf_to_png_images(pdf_path, dpi=150)
+
+        if len(pages) > 1:
+            raise ValueError(
+                f"Invalid PDF: the file contains {len(pages)} pages. "
+                "Only single-page invoices are accepted."
+            )
+
+        blank_flags = are_pdf_pages_blank(pdf_path, dpi=150)
+        if blank_flags[0]:
+            raise ValueError("Invalid PDF: the first page is blank.")
+
+    def _convert_pdf_to_jpg_tmpfile(self, pdf_path: str) -> str:
+        """
+        Render the first page of the validated PDF to a JPEG temporary file.
+
+        Args:
+            pdf_path (str): Path to the validated single-page PDF.
+
+        Returns:
+            str: Absolute path to the created JPEG temporary file.
+                 The caller is responsible for deleting this file after use.
+        """
+        import tempfile
+        pages = pdf_to_png_images(pdf_path, dpi=200)
+        page_image = pages[0].convert("RGB")  # JPEG requires RGB mode
+
+        tmp = tempfile.NamedTemporaryFile(suffix=".jpg", delete=False)
+        tmp.close()  # Close so PIL can write on all platforms
+        page_image.save(tmp.name, format="JPEG", quality=95)
+        return tmp.name
+
+    def extract_data(self, pdf_path: str) -> Dict[str, Any]:
+        """
+        Validate, convert, and extract structured data from an invoice PDF.
+
+        The PDF is first checked for structural validity (single non-blank
+        page), then rendered to a JPEG temporary file which is passed to
+        the Gemini client for extraction. The temporary file is cleaned up
+        automatically before this method returns.
+
+        Args:
+            pdf_path (str): Path to the invoice PDF file.
+
         Returns:
             dict: Extracted invoice data in structured format.
-        
+
         Raises:
-            FileNotFoundError: If the image file does not exist.
+            FileNotFoundError: If the PDF file does not exist.
+            ValueError: If the PDF fails structural validation.
         """
-        if not os.path.exists(image_path):
-            raise FileNotFoundError(f"Invoice image not found at: {image_path}")
-        
-        print(f"Extracting data from: {image_path}")
-        extracted_data = self.gemini_client.extract_invoice_data(image_path)
-        print("Data extraction completed successfully.")
-        
+        if not os.path.exists(pdf_path):
+            raise FileNotFoundError(f"Invoice PDF not found at: {pdf_path}")
+
+        # Structural validation (page count + blank check)
+        print(f"Validating PDF: {pdf_path}")
+        self._validate_pdf(pdf_path)
+        print("PDF validation passed.")
+
+        # Convert the single page to a JPEG temp file
+        jpg_tmp_path = self._convert_pdf_to_jpg_tmpfile(pdf_path)
+
+        try:
+            print(f"Extracting data from: {pdf_path}")
+            extracted_data = self.gemini_client.extract_invoice_data(jpg_tmp_path)
+            print("Data extraction completed successfully.")
+        finally:
+            # Always remove the JPEG temp file
+            if os.path.exists(jpg_tmp_path):
+                os.remove(jpg_tmp_path)
+
         return extracted_data
     
     def validate_data(self, extracted_data: Dict[str, Any]) -> Dict[str, Dict]:
@@ -209,14 +276,14 @@ class InvoiceProcessor:
             print("\n" + report_text)
             return None
     
-    def process_invoice(self, image_path: str, output_dir: str = None) -> Dict[str, Any]:
+    def process_invoice(self, pdf_path: str, output_dir: str = None) -> Dict[str, Any]:
         """
         Complete end-to-end processing of an invoice.
         
         Extracts data, validates it, and generates reports.
         
         Args:
-            image_path (str): Path to the invoice image file.
+            pdf_path (str): Path to the invoice PDF file.
             output_dir (str, optional): Directory to save output files. If None, uses current directory.
         
         Returns:
@@ -225,18 +292,18 @@ class InvoiceProcessor:
                 - validation_results: The validation results
                 - report_path: Path to the generated report (if output_dir specified)
         """
-        # Extract data
-        extracted_data = self.extract_data(image_path)
-        
+        # Extract data (includes PDF validation + temp JPEG conversion internally)
+        extracted_data = self.extract_data(pdf_path)
+
         # Validate data
         validation_results = self.validate_data(extracted_data)
-        
+
         # Prepare output directory
         if output_dir:
             os.makedirs(output_dir, exist_ok=True)
-            
+
             # Save extracted data
-            base_name = Path(image_path).stem
+            base_name = Path(pdf_path).stem
             data_path = os.path.join(output_dir, f"{base_name}_extracted_data.json")
             with open(data_path, 'w', encoding='utf-8') as f:
                 json.dump(extracted_data, f, indent=2, ensure_ascii=False)
@@ -276,12 +343,12 @@ def main():
         print("  python main.py invoices/invoice_001.jpg output/")
         sys.exit(1)
     
-    image_path = sys.argv[1]
+    pdf_path = sys.argv[1]
     output_dir = sys.argv[2] if len(sys.argv) > 2 else "output"
     
     try:
         processor = InvoiceProcessor()
-        results = processor.process_invoice(image_path, output_dir)
+        results = processor.process_invoice(pdf_path, output_dir)
         
         # Print summary
         print("\n" + "=" * 80)
@@ -305,7 +372,7 @@ def main():
         
         print("=" * 80)
         
-    except FileNotFoundError as e:
+    except (FileNotFoundError, ValueError) as e:
         print(f"Error: {e}")
         sys.exit(1)
     except Exception as e:

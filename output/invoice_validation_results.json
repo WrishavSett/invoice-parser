@@ -52,7 +52,7 @@
       "Total INR is present.",
       "Total invoice value in INR is present.",
       "Total invoice value in words is present.",
-      "IGST is 9356.4 and correctly calculated at 18.0%. CGST and SGST are NIL.",
+      "IGST is 9356.4 and correctly calculated at 18%. CGST and SGST are NIL.",
       "Computed line-item total matches the sum of taxable value and taxes.",
       "Line-item total INR matches invoice-level total INR.",
       "Invoice total amount in words matches the numeric total INR."
