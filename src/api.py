@@ -44,6 +44,7 @@ except ImportError:
 
 from gemini_client import GeminiClient
 from validator import InvoiceValidator
+from helper import pdf_to_png_images, are_pdf_pages_blank
 
 
 # Initialize FastAPI app
@@ -130,12 +131,19 @@ class InvoiceProcessingAPI:
     def _validate_file(self, upload_file: UploadFile):
         """
         Validate the uploaded file.
-        
+
+        Only PDF files are accepted. The file must also be within the
+        10 MB size limit.  Structural PDF checks (page count, blank page)
+        are performed separately in _validate_pdf_structure after the
+        file has been saved to disk.
+
         Args:
             upload_file (UploadFile): The uploaded file to validate.
-        
+
         Raises:
-            HTTPException: If validation fails.
+            HTTPException 400: If no file is provided.
+            HTTPException 400: If the file exceeds 10 MB.
+            HTTPException 400: If the file is not a PDF.
         """
         # Check if file is provided
         if not upload_file:
@@ -143,27 +151,98 @@ class InvoiceProcessingAPI:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="No file provided"
             )
-        
-        # Check file size (e.g., max 10MB)
-        max_size = 10 * 1024 * 1024  # 10MB in bytes
+
+        # Check file size (max 10 MB)
+        max_size = 10 * 1024 * 1024  # 10 MB in bytes
         upload_file.file.seek(0, 2)  # Seek to end
         file_size = upload_file.file.tell()
         upload_file.file.seek(0)  # Reset to beginning
-        
+
         if file_size > max_size:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"File size exceeds maximum allowed size of 10MB. Received: {file_size / (1024*1024):.2f}MB"
+                detail=(
+                    f"File size exceeds the maximum allowed size of 10 MB. "
+                    f"Received: {file_size / (1024 * 1024):.2f} MB"
+                )
             )
-        
-        # Check file extension
-        allowed_extensions = {'.jpg', '.jpeg', '.png', '.pdf', '.tiff', '.tif'}
+
+        # Only PDF files are accepted
         file_extension = os.path.splitext(upload_file.filename)[1].lower()
-        
-        if file_extension not in allowed_extensions:
+        if file_extension != ".pdf":
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Invalid file type. Allowed types: {', '.join(allowed_extensions)}"
+                detail=(
+                    f"Invalid file type '{file_extension}'. "
+                    "Only PDF files (.pdf) are accepted."
+                )
+            )
+
+    def _validate_pdf_structure(self, pdf_path: str):
+        """
+        Validate the structural integrity of the uploaded PDF.
+
+        Rules:
+            1. The PDF must be exactly **1 page** long.
+            2. The first (and only) page must **not** be blank.
+
+        Args:
+            pdf_path (str): Absolute path to the temporary PDF file on disk.
+
+        Raises:
+            HTTPException 400: If the PDF contains more than one page.
+            HTTPException 400: If the first page is detected as blank.
+        """
+        # Render all pages to PIL images (low DPI is fast enough for counting)
+        pages = pdf_to_png_images(pdf_path, dpi=150)
+
+        # Rule 1 — must be exactly one page
+        if len(pages) > 1:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    f"Invalid PDF: the file contains {len(pages)} pages. "
+                    "Only single-page invoices are accepted."
+                )
+            )
+
+        # Rule 2 — the page must not be blank
+        blank_flags = are_pdf_pages_blank(pdf_path, dpi=150)
+        if blank_flags[0]:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid PDF: the first page is blank."
+            )
+
+    def _convert_pdf_to_jpg_tmpfile(self, pdf_path: str) -> str:
+        """
+        Render the first page of the validated PDF to a JPEG temporary file.
+
+        The JPEG temp file is what gets passed to the Gemini client for
+        data extraction. The caller is responsible for deleting it after
+        use via _cleanup_temp_file.
+
+        Args:
+            pdf_path (str): Absolute path to the validated PDF file.
+
+        Returns:
+            str: Absolute path to the created JPEG temporary file.
+
+        Raises:
+            HTTPException 500: If rendering or saving the JPEG fails.
+        """
+        try:
+            pages = pdf_to_png_images(pdf_path, dpi=200)
+            page_image = pages[0].convert("RGB")  # JPEG requires RGB mode
+
+            tmp = tempfile.NamedTemporaryFile(suffix=".jpg", delete=False)
+            tmp.close()  # Close so PIL can open and write on all platforms
+            page_image.save(tmp.name, format="JPEG", quality=95)
+            return tmp.name
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Failed to convert PDF page to JPEG: {str(e)}"
             )
     
     def _extract_data(self, image_path: str) -> Dict[str, Any]:
@@ -274,25 +353,31 @@ class InvoiceProcessingAPI:
         Raises:
             HTTPException: If any step of processing fails.
         """
-        temp_file_path = None
-        
+        pdf_tmp_path = None
+        jpg_tmp_path = None
+
         try:
-            # Validate the uploaded file
+            # Step 1 — basic file validation (type + size)
             self._validate_file(upload_file)
-            
-            # Save to temporary location
-            temp_file_path = self._save_uploaded_file(upload_file)
-            
-            # Extract data
-            extracted_data = self._extract_data(temp_file_path)
-            
-            # Validate data
+
+            # Step 2 — persist the PDF to a temp file so we can inspect it
+            pdf_tmp_path = self._save_uploaded_file(upload_file)
+
+            # Step 3 — structural PDF validation (page count + blank check)
+            self._validate_pdf_structure(pdf_tmp_path)
+
+            # Step 4 — render the PDF page to a JPEG temp file
+            jpg_tmp_path = self._convert_pdf_to_jpg_tmpfile(pdf_tmp_path)
+
+            # Step 5 — extract structured data from the JPEG via Gemini
+            extracted_data = self._extract_data(jpg_tmp_path)
+
+            # Step 6 — validate extracted data
             validation_results = self._validate_data(extracted_data)
-            
-            # Build summary
+
+            # Step 7 — build summary + response
             summary = self._build_summary(validation_results)
-            
-            # Build response
+
             response = {
                 "status": "success",
                 "timestamp": datetime.utcnow().isoformat(),
@@ -301,27 +386,23 @@ class InvoiceProcessingAPI:
                 "extracted_data": extracted_data,
                 "validation_results": validation_results
             }
-            
+
             return response
-            
+
         except HTTPException:
-            # Re-raise HTTP exceptions as-is
+            # Re-raise HTTP exceptions (400 / 500) as-is
             raise
         except Exception as e:
             # Catch any unexpected errors
-            error_detail = {
-                "error": str(e),
-                "type": type(e).__name__,
-                "traceback": traceback.format_exc()
-            }
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Unexpected error during processing: {str(e)}"
             )
         finally:
-            # Clean up temporary file
-            if temp_file_path:
-                self._cleanup_temp_file(temp_file_path)
+            # Always clean up both temp files, even if an exception occurred
+            for path in (pdf_tmp_path, jpg_tmp_path):
+                if path:
+                    self._cleanup_temp_file(path)
 
 
 # Create API instance
@@ -399,9 +480,9 @@ async def process_invoice_endpoint(file: UploadFile = File(...)):
     validates the extracted information, and returns a comprehensive JSON response.
     
     Args:
-        file (UploadFile): The invoice image file to process.
-                          Supported formats: JPG, JPEG, PNG, PDF, TIFF
-                          Max size: 10MB
+        file (UploadFile): The invoice PDF file to process.
+                          Supported format: PDF (.pdf)
+                          Max size: 10 MB
     
     Returns:
         dict: JSON response containing:
@@ -420,7 +501,7 @@ async def process_invoice_endpoint(file: UploadFile = File(...)):
         {
             "status": "success",
             "timestamp": "2024-02-16T10:30:00.123456",
-            "filename": "invoice_001.jpg",
+            "filename": "invoice_001.pdf",
             "summary": {
                 "total_checks": 50,
                 "passed": 48,
@@ -460,7 +541,7 @@ async def extract_only_endpoint(file: UploadFile = File(...)):
     useful when you need raw extracted data quickly.
     
     Args:
-        file (UploadFile): The invoice image file to process.
+        file (UploadFile): The invoice PDF file to process.
     
     Returns:
         dict: JSON response with extracted data only.
@@ -469,7 +550,7 @@ async def extract_only_endpoint(file: UploadFile = File(...)):
         {
             "status": "success",
             "timestamp": "2024-02-16T10:30:00.123456",
-            "filename": "invoice_001.jpg",
+            "filename": "invoice_001.pdf",
             "extracted_data": {
                 "letter_head": {...},
                 "tax_invoice": {...},
@@ -477,18 +558,25 @@ async def extract_only_endpoint(file: UploadFile = File(...)):
             }
         }
     """
-    temp_file_path = None
-    
+    pdf_tmp_path = None
+    jpg_tmp_path = None
+
     try:
-        # Validate the uploaded file
+        # Step 1 — basic file validation (type + size)
         api_handler._validate_file(file)
-        
-        # Save to temporary location
-        temp_file_path = api_handler._save_uploaded_file(file)
-        
-        # Extract data
-        extracted_data = api_handler._extract_data(temp_file_path)
-        
+
+        # Step 2 — persist the PDF to a temp file
+        pdf_tmp_path = api_handler._save_uploaded_file(file)
+
+        # Step 3 — structural PDF validation (page count + blank check)
+        api_handler._validate_pdf_structure(pdf_tmp_path)
+
+        # Step 4 — render the PDF page to a JPEG temp file
+        jpg_tmp_path = api_handler._convert_pdf_to_jpg_tmpfile(pdf_tmp_path)
+
+        # Step 5 — extract structured data from the JPEG via Gemini
+        extracted_data = api_handler._extract_data(jpg_tmp_path)
+
         # Build response
         response = {
             "status": "success",
@@ -496,9 +584,9 @@ async def extract_only_endpoint(file: UploadFile = File(...)):
             "filename": file.filename,
             "extracted_data": extracted_data
         }
-        
+
         return JSONResponse(content=response, status_code=status.HTTP_200_OK)
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -507,8 +595,10 @@ async def extract_only_endpoint(file: UploadFile = File(...)):
             detail=f"Extraction failed: {str(e)}"
         )
     finally:
-        if temp_file_path:
-            api_handler._cleanup_temp_file(temp_file_path)
+        # Always clean up both temp files
+        for path in (pdf_tmp_path, jpg_tmp_path):
+            if path:
+                api_handler._cleanup_temp_file(path)
 
 
 @app.exception_handler(Exception)
