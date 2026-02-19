@@ -473,9 +473,9 @@ class InvoiceValidator:
                     total_invoice_value_words = total_invoice_value['in_words']
                 self.passes["resource_and_bill"].append("Total invoice value in words is present.")
 
-            cgst_amt = ((cgst_percent/100.0)*taxable_value)
-            sgst_amt = ((sgst_percent/100.0)*taxable_value)
-            igst_amt = ((igst_percent/100.0)*taxable_value)
+            cgst_amt = round(((cgst_percent/100.0)*taxable_value), 2)
+            sgst_amt = round(((sgst_percent/100.0)*taxable_value), 2)
+            igst_amt = round(((igst_percent/100.0)*taxable_value), 2)
 
             if igst != 0.00:
                 if cgst == 0.00 and sgst == 0.00:
