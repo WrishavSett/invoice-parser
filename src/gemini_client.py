@@ -266,6 +266,8 @@ class GeminiClient:
 
 Rules:
 
+Return ONLY the actual address (uptill the PIN code).
+
 Return ONLY the actual values, NOT the labels.
 Example 1: From "CIN No:U74140WB1993PLC059586", return only "U74140WB1993PLC059586"
 Example 2: From "Pan No : AACCE4175D", return only "AACCE4175D"
