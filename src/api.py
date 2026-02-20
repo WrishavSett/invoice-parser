@@ -34,6 +34,7 @@ import tempfile
 import traceback
 from typing import Dict, Any, Optional
 from datetime import datetime
+from datetime import timezone
 
 try:
     from fastapi import FastAPI, File, UploadFile, HTTPException, status
@@ -45,7 +46,7 @@ except ImportError:
 from gemini_client import GeminiClient
 from validator import InvoiceValidator
 from helper import pdf_to_png_images, are_pdf_pages_blank
-
+from helper import fetch_digital_invoices, download_pdf_from_url, load_processed_log, is_already_processed, update_processed_log
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -599,6 +600,143 @@ async def extract_only_endpoint(file: UploadFile = File(...)):
         for path in (pdf_tmp_path, jpg_tmp_path):
             if path:
                 api_handler._cleanup_temp_file(path)
+
+
+@app.post("/process-invoices-from-api", tags=["Invoice Processing"])
+async def process_invoices_from_api_endpoint():
+    """
+    Fetch invoices from the client's GSPPI API and process all unprocessed ones.
+
+    This endpoint calls the GetDigitalInvoice API to retrieve the full invoice
+    list, filters out any BillIDs already recorded in the processed log, and
+    runs each remaining invoice through the full pipeline:
+      download → PDF validation → JPEG conversion → extraction → validation
+
+    Each invoice's outcome (success or failure) is written to the processed
+    invoices log immediately after processing so that reruns always skip it.
+
+    Returns:
+        dict: JSON response containing:
+            - status (str): 'success' (even if some invoices failed individually)
+            - timestamp (str): UTC timestamp of the run
+            - summary (dict): Counts of total fetched, skipped, succeeded, failed
+            - results (dict): Per-BillID outcome keyed by BillID, each containing:
+                - bill_id (str)
+                - doc_type (str)
+                - url (str)
+                - status (str): 'success', 'failed', or 'skipped'
+                - error (str, optional): present only when status is 'failed'
+                - extracted_data (dict, optional): present only on success
+                - validation_results (dict, optional): present only on success
+                - validation_summary (dict, optional): present only on success
+
+    Raises:
+        HTTPException 500: If the GSPPI API itself cannot be reached.
+    """
+    # Step 1 — fetch the full invoice list from the client API
+    try:
+        invoice_list = fetch_digital_invoices()
+    except RuntimeError as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to fetch invoices from GSPPI API: {str(e)}"
+        )
+
+    # Step 2 — load the processed log once for the entire run
+    processed_log = load_processed_log()
+
+    results = {}
+    skipped = 0
+    succeeded = 0
+    failed = 0
+
+    for invoice in invoice_list:
+        bill_id = invoice.get("BillID", "")
+        url = invoice.get("Url", "")
+        doc_type = invoice.get("DocType", "")
+
+        # Step 3 — skip if already in the log
+        if is_already_processed(bill_id, processed_log):
+            skipped += 1
+            results[bill_id] = {
+                "bill_id": bill_id,
+                "doc_type": doc_type,
+                "url": url,
+                "status": "skipped"
+            }
+            continue
+
+        pdf_tmp_path = None
+        jpg_tmp_path = None
+
+        try:
+            # Step 4 — download the PDF to a temp file
+            pdf_tmp_path = download_pdf_from_url(url)
+
+            # Step 5 — structural PDF validation (page count + blank check)
+            api_handler._validate_pdf_structure(pdf_tmp_path)
+
+            # Step 6 — render to JPEG for Gemini
+            jpg_tmp_path = api_handler._convert_pdf_to_jpg_tmpfile(pdf_tmp_path)
+
+            # Step 7 — extract structured data via Gemini
+            extracted_data = api_handler._extract_data(jpg_tmp_path)
+
+            # Step 8 — validate extracted data
+            validation_results = api_handler._validate_data(extracted_data)
+
+            # Step 9 — build summary
+            validation_summary = api_handler._build_summary(validation_results)
+
+            # Step 10 — write success to log
+            update_processed_log(bill_id, status="success")
+
+            succeeded += 1
+            results[bill_id] = {
+                "bill_id": bill_id,
+                "doc_type": doc_type,
+                "url": url,
+                "status": "success",
+                "extracted_data": extracted_data,
+                "validation_results": validation_results,
+                "validation_summary": validation_summary
+            }
+
+        except Exception as e:
+            error_message = str(e)
+
+            # Write failure to log — this BillID will be skipped on future runs
+            update_processed_log(bill_id, status="failed", error=error_message)
+
+            failed += 1
+            results[bill_id] = {
+                "bill_id": bill_id,
+                "doc_type": doc_type,
+                "url": url,
+                "status": "failed",
+                "error": error_message
+            }
+
+        finally:
+            # Always clean up temp files for this invoice
+            for path in (pdf_tmp_path, jpg_tmp_path):
+                if path:
+                    api_handler._cleanup_temp_file(path)
+
+    return JSONResponse(
+        content={
+            "status": "success",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "summary": {
+                "total_fetched": len(invoice_list),
+                "skipped": skipped,
+                "succeeded": succeeded,
+                "failed": failed
+            },
+            "results": results
+        },
+        status_code=status.HTTP_200_OK
+    )
 
 
 @app.exception_handler(Exception)
