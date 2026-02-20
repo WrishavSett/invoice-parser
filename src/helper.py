@@ -337,7 +337,10 @@ def load_processed_log() -> dict:
         return {}
 
     with open(PROCESSED_LOG_PATH, "r", encoding="utf-8") as f:
-        return json.load(f)
+        content = f.read().strip()
+        if not content:
+            return {}
+        return json.loads(content)
 
 
 def is_already_processed(bill_id: str, log: dict) -> bool:
