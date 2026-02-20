@@ -19,6 +19,11 @@ import numpy as np
 from PIL import Image
 from pathlib import Path
 
+import json
+import os
+import requests
+from datetime import datetime, timezone
+
 def number_to_words_inr(amount: float) -> str:
     """
     Convert a numeric amount to its word representation in Indian Rupees format.
@@ -212,3 +217,170 @@ def are_pdf_pages_blank(
         results.append(bool(ratio >= white_pixel_ratio))
 
     return results
+
+
+GSPPI_API_URL = "https://gsppi.geniusconsultant.com/GSPPI_API_V2/api/Invoice/GetDigitalInvoice"
+GSPPI_BEARER_TOKEN = os.getenv("GSPPI_BEARER_TOKEN", "56dc60de-5d3e-4a1d-84e1-a05fe6a151ce")
+GSPPI_SECURITY_CODE = os.getenv("GSPPI_SECURITY_CODE", "888")
+
+
+def fetch_digital_invoices() -> list:
+    """
+    Fetch the list of digital invoices from the client's GSPPI API.
+
+    Makes a POST request to the GetDigitalInvoice endpoint using bearer token
+    authentication and returns the list of invoice records from Response_Data.
+
+    Returns:
+        list: A list of dicts, each containing 'BillID', 'Url', and 'DocType'.
+
+    Raises:
+        RuntimeError: If the HTTP request fails or the API returns a non-101
+                      response code.
+
+    Example return value:
+        [
+            {
+                "BillID": "GWBIAR/FB0001/26",
+                "Url": "https://...pdf",
+                "DocType": ""
+            },
+            ...
+        ]
+    """
+    try:
+        response = requests.post(
+            GSPPI_API_URL,
+            headers={
+                "Authorization": f"Bearer {GSPPI_BEARER_TOKEN}",
+                "Content-Type": "application/json"
+            },
+            json={"SecurityCode": GSPPI_SECURITY_CODE},
+            timeout=30
+        )
+        response.raise_for_status()
+    except requests.RequestException as e:
+        raise RuntimeError(f"Failed to reach GSPPI API: {e}")
+
+    data = response.json()
+
+    if data.get("Response_Code") != "101":
+        raise RuntimeError(
+            f"GSPPI API returned an error. "
+            f"Code: {data.get('Response_Code')}, "
+            f"Message: {data.get('Response_Message')}"
+        )
+
+    return data.get("Response_Data", [])
+
+
+def download_pdf_from_url(url: str) -> str:
+    """
+    Download a PDF from a URL and save it to a named temporary file.
+
+    The caller is responsible for deleting the temp file after use.
+
+    Args:
+        url (str): The direct URL of the PDF file to download.
+
+    Returns:
+        str: Absolute path to the saved temporary PDF file.
+
+    Raises:
+        ValueError: If the URL is empty or None.
+        RuntimeError: If the download fails or the server returns a non-200 status.
+
+    Example:
+        >>> path = download_pdf_from_url("https://example.com/invoice.pdf")
+        >>> print(path)  # /tmp/tmpXXXXXX.pdf
+    """
+    if not url:
+        raise ValueError("URL must not be empty.")
+
+    try:
+        response = requests.get(url, timeout=60)
+        response.raise_for_status()
+    except requests.RequestException as e:
+        raise RuntimeError(f"Failed to download PDF from '{url}': {e}")
+
+    import tempfile
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+        tmp.write(response.content)
+        return tmp.name
+
+
+PROCESSED_LOG_PATH = os.getenv("PROCESSED_LOG_PATH", "processed_invoices.json")
+
+
+def load_processed_log() -> dict:
+    """
+    Load the processed invoices log from disk.
+
+    If the log file does not exist yet, an empty dict is returned without
+    raising an error — the file will be created on the first write.
+
+    Returns:
+        dict: A dict keyed by BillID. Each value is a dict containing at least:
+              - 'processed_at' (str): ISO-8601 UTC timestamp
+              - 'status' (str): 'success' or 'failed'
+              - 'error' (str, optional): Error message if status is 'failed'
+
+    Example:
+        {
+            "GWBIAR/FB0001/26": {
+                "processed_at": "2026-02-20T12:00:00+00:00",
+                "status": "success"
+            }
+        }
+    """
+    if not os.path.exists(PROCESSED_LOG_PATH):
+        return {}
+
+    with open(PROCESSED_LOG_PATH, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def is_already_processed(bill_id: str, log: dict) -> bool:
+    """
+    Check whether a BillID has already been processed.
+
+    Args:
+        bill_id (str): The invoice BillID to check (e.g. 'GWBIAR/FB0001/26').
+        log (dict): The processed log dict returned by load_processed_log().
+
+    Returns:
+        bool: True if the BillID is present in the log, False otherwise.
+    """
+    return bill_id in log
+
+
+def update_processed_log(bill_id: str, status: str, error: str = None):
+    """
+    Append or update a BillID entry in the processed invoices log and write to disk.
+
+    If the log file does not exist it is created. If the BillID already exists
+    in the file its entry is overwritten (this should not happen in normal flow
+    since we skip already-logged invoices, but is safe to handle).
+
+    Args:
+        bill_id (str): The invoice BillID (e.g. 'GWBIAR/FB0001/26').
+        status (str): Outcome of processing — 'success' or 'failed'.
+        error (str, optional): Error message to record when status is 'failed'.
+                               Pass None for successful processing.
+
+    Raises:
+        IOError: If the log file cannot be written.
+    """
+    log = load_processed_log()
+
+    entry = {
+        "processed_at": datetime.now(timezone.utc).isoformat(),
+        "status": status
+    }
+    if error is not None:
+        entry["error"] = error
+
+    log[bill_id] = entry
+
+    with open(PROCESSED_LOG_PATH, "w", encoding="utf-8") as f:
+        json.dump(log, f, indent=4, ensure_ascii=False)
