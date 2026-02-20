@@ -343,31 +343,18 @@ def load_processed_log() -> dict:
         return json.loads(content)
 
 
-def is_already_processed(bill_id: str, log: dict) -> bool:
-    """
-    Check whether a BillID has already been processed.
-
-    Args:
-        bill_id (str): The invoice BillID to check (e.g. 'GWBIAR/FB0001/26').
-        log (dict): The processed log dict returned by load_processed_log().
-
-    Returns:
-        bool: True if the BillID is present in the log, False otherwise.
-    """
-    return bill_id in log
-
-
-def update_processed_log(bill_id: str, status: str, error: str = None):
+def update_processed_log(bill_id: str, status: str, url: str = "", doc_type: str = "", error: str = None):
     """
     Append or update a BillID entry in the processed invoices log and write to disk.
 
-    If the log file does not exist it is created. If the BillID already exists
-    in the file its entry is overwritten (this should not happen in normal flow
-    since we skip already-logged invoices, but is safe to handle).
+    If the BillID already exists in the log (e.g. a previously failed invoice
+    that the client has resent), its entry is overwritten with the latest outcome.
 
     Args:
         bill_id (str): The invoice BillID (e.g. 'GWBIAR/FB0001/26').
         status (str): Outcome of processing — 'success' or 'failed'.
+        url (str): The PDF URL for this invoice.
+        doc_type (str): The DocType value from the GSPPI API.
         error (str, optional): Error message to record when status is 'failed'.
                                Pass None for successful processing.
 
@@ -378,7 +365,9 @@ def update_processed_log(bill_id: str, status: str, error: str = None):
 
     entry = {
         "processed_at": datetime.now(timezone.utc).isoformat(),
-        "status": status
+        "status": status,
+        "url": url,
+        "doc_type": doc_type
     }
     if error is not None:
         entry["error"] = error
