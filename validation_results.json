@@ -1,6 +1,6 @@
 {
     "status": "success",
-    "timestamp": "2026-02-23T18:11:41.275479+00:00",
+    "timestamp": "2026-02-23T18:56:48.502593+00:00",
     "summary": {
         "total_fetched": 50,
         "succeeded": 50,
@@ -169,7 +169,7 @@
                 "total_checks": 45,
                 "passed": 45,
                 "failed": 0,
-                "success_rate": 100.0,
+                "success_rate": 100,
                 "status": "success"
             }
         },
@@ -335,7 +335,7 @@
                 "total_checks": 45,
                 "passed": 45,
                 "failed": 0,
-                "success_rate": 100.0,
+                "success_rate": 100,
                 "status": "success"
             }
         },
@@ -501,7 +501,7 @@
                 "total_checks": 45,
                 "passed": 45,
                 "failed": 0,
-                "success_rate": 100.0,
+                "success_rate": 100,
                 "status": "success"
             }
         },
@@ -667,7 +667,7 @@
                 "total_checks": 45,
                 "passed": 45,
                 "failed": 0,
-                "success_rate": 100.0,
+                "success_rate": 100,
                 "status": "success"
             }
         },
@@ -833,7 +833,7 @@
                 "total_checks": 45,
                 "passed": 45,
                 "failed": 0,
-                "success_rate": 100.0,
+                "success_rate": 100,
                 "status": "success"
             }
         },
@@ -923,9 +923,7 @@
                     "tax_invoice": [],
                     "bill_to": [],
                     "invoice": [],
-                    "resource_and_bill": [
-                        "Computed line-item total does not match the sum of taxable value and taxes."
-                    ],
+                    "resource_and_bill": [],
                     "note": [],
                     "beneficiary": [],
                     "qr_code": [],
@@ -997,11 +995,11 @@
                 }
             },
             "validation_summary": {
-                "total_checks": 45,
+                "total_checks": 44,
                 "passed": 44,
-                "failed": 1,
-                "success_rate": 97.78,
-                "status": "validation_errors"
+                "failed": 0,
+                "success_rate": 100,
+                "status": "success"
             }
         },
         "GWBIAR/FB0007/26": {
@@ -1166,7 +1164,7 @@
                 "total_checks": 45,
                 "passed": 45,
                 "failed": 0,
-                "success_rate": 100.0,
+                "success_rate": 100,
                 "status": "success"
             }
         },
@@ -1332,7 +1330,7 @@
                 "total_checks": 45,
                 "passed": 45,
                 "failed": 0,
-                "success_rate": 100.0,
+                "success_rate": 100,
                 "status": "success"
             }
         },
@@ -1422,9 +1420,7 @@
                     "tax_invoice": [],
                     "bill_to": [],
                     "invoice": [],
-                    "resource_and_bill": [
-                        "Computed line-item total does not match the sum of taxable value and taxes."
-                    ],
+                    "resource_and_bill": [],
                     "note": [],
                     "beneficiary": [],
                     "qr_code": [],
@@ -1496,11 +1492,11 @@
                 }
             },
             "validation_summary": {
-                "total_checks": 45,
+                "total_checks": 44,
                 "passed": 44,
-                "failed": 1,
-                "success_rate": 97.78,
-                "status": "validation_errors"
+                "failed": 0,
+                "success_rate": 100,
+                "status": "success"
             }
         },
         "GWBIAR/FB0010/26": {
@@ -1665,7 +1661,7 @@
                 "total_checks": 45,
                 "passed": 45,
                 "failed": 0,
-                "success_rate": 100.0,
+                "success_rate": 100,
                 "status": "success"
             }
         },
@@ -1831,7 +1827,7 @@
                 "total_checks": 45,
                 "passed": 45,
                 "failed": 0,
-                "success_rate": 100.0,
+                "success_rate": 100,
                 "status": "success"
             }
         },
@@ -1997,7 +1993,7 @@
                 "total_checks": 45,
                 "passed": 45,
                 "failed": 0,
-                "success_rate": 100.0,
+                "success_rate": 100,
                 "status": "success"
             }
         },
@@ -2163,7 +2159,7 @@
                 "total_checks": 45,
                 "passed": 45,
                 "failed": 0,
-                "success_rate": 100.0,
+                "success_rate": 100,
                 "status": "success"
             }
         },
@@ -2329,7 +2325,7 @@
                 "total_checks": 45,
                 "passed": 45,
                 "failed": 0,
-                "success_rate": 100.0,
+                "success_rate": 100,
                 "status": "success"
             }
         },
@@ -2495,7 +2491,7 @@
                 "total_checks": 45,
                 "passed": 45,
                 "failed": 0,
-                "success_rate": 100.0,
+                "success_rate": 100,
                 "status": "success"
             }
         },
@@ -2661,7 +2657,7 @@
                 "total_checks": 45,
                 "passed": 45,
                 "failed": 0,
-                "success_rate": 100.0,
+                "success_rate": 100,
                 "status": "success"
             }
         },
@@ -2827,7 +2823,7 @@
                 "total_checks": 45,
                 "passed": 45,
                 "failed": 0,
-                "success_rate": 100.0,
+                "success_rate": 100,
                 "status": "success"
             }
         },
@@ -2993,7 +2989,7 @@
                 "total_checks": 45,
                 "passed": 45,
                 "failed": 0,
-                "success_rate": 100.0,
+                "success_rate": 100,
                 "status": "success"
             }
         },
@@ -3159,7 +3155,7 @@
                 "total_checks": 45,
                 "passed": 45,
                 "failed": 0,
-                "success_rate": 100.0,
+                "success_rate": 100,
                 "status": "success"
             }
         },
@@ -3325,7 +3321,7 @@
                 "total_checks": 45,
                 "passed": 45,
                 "failed": 0,
-                "success_rate": 100.0,
+                "success_rate": 100,
                 "status": "success"
             }
         },
@@ -3415,9 +3411,7 @@
                     "tax_invoice": [],
                     "bill_to": [],
                     "invoice": [],
-                    "resource_and_bill": [
-                        "Computed line-item total does not match the sum of taxable value and taxes."
-                    ],
+                    "resource_and_bill": [],
                     "note": [],
                     "beneficiary": [],
                     "qr_code": [],
@@ -3489,11 +3483,11 @@
                 }
             },
             "validation_summary": {
-                "total_checks": 45,
+                "total_checks": 44,
                 "passed": 44,
-                "failed": 1,
-                "success_rate": 97.78,
-                "status": "validation_errors"
+                "failed": 0,
+                "success_rate": 100,
+                "status": "success"
             }
         },
         "GWBIAR/FB0022/26": {
@@ -3658,7 +3652,7 @@
                 "total_checks": 45,
                 "passed": 45,
                 "failed": 0,
-                "success_rate": 100.0,
+                "success_rate": 100,
                 "status": "success"
             }
         },
@@ -3824,7 +3818,7 @@
                 "total_checks": 45,
                 "passed": 45,
                 "failed": 0,
-                "success_rate": 100.0,
+                "success_rate": 100,
                 "status": "success"
             }
         },
@@ -3990,7 +3984,7 @@
                 "total_checks": 45,
                 "passed": 45,
                 "failed": 0,
-                "success_rate": 100.0,
+                "success_rate": 100,
                 "status": "success"
             }
         },
@@ -4080,9 +4074,7 @@
                     "tax_invoice": [],
                     "bill_to": [],
                     "invoice": [],
-                    "resource_and_bill": [
-                        "Computed line-item total does not match the sum of taxable value and taxes."
-                    ],
+                    "resource_and_bill": [],
                     "note": [],
                     "beneficiary": [],
                     "qr_code": [],
@@ -4154,11 +4146,11 @@
                 }
             },
             "validation_summary": {
-                "total_checks": 45,
+                "total_checks": 44,
                 "passed": 44,
-                "failed": 1,
-                "success_rate": 97.78,
-                "status": "validation_errors"
+                "failed": 0,
+                "success_rate": 100,
+                "status": "success"
             }
         },
         "GWBIAR/FB0026/26": {
@@ -4247,9 +4239,7 @@
                     "tax_invoice": [],
                     "bill_to": [],
                     "invoice": [],
-                    "resource_and_bill": [
-                        "Computed line-item total does not match the sum of taxable value and taxes."
-                    ],
+                    "resource_and_bill": [],
                     "note": [],
                     "beneficiary": [],
                     "qr_code": [],
@@ -4321,11 +4311,11 @@
                 }
             },
             "validation_summary": {
-                "total_checks": 45,
+                "total_checks": 44,
                 "passed": 44,
-                "failed": 1,
-                "success_rate": 97.78,
-                "status": "validation_errors"
+                "failed": 0,
+                "success_rate": 100,
+                "status": "success"
             }
         },
         "GWBIAR/FB0027/26": {
@@ -4490,7 +4480,7 @@
                 "total_checks": 45,
                 "passed": 45,
                 "failed": 0,
-                "success_rate": 100.0,
+                "success_rate": 100,
                 "status": "success"
             }
         },
@@ -4656,7 +4646,7 @@
                 "total_checks": 45,
                 "passed": 45,
                 "failed": 0,
-                "success_rate": 100.0,
+                "success_rate": 100,
                 "status": "success"
             }
         },
@@ -4822,7 +4812,7 @@
                 "total_checks": 45,
                 "passed": 45,
                 "failed": 0,
-                "success_rate": 100.0,
+                "success_rate": 100,
                 "status": "success"
             }
         },
@@ -4988,7 +4978,7 @@
                 "total_checks": 45,
                 "passed": 45,
                 "failed": 0,
-                "success_rate": 100.0,
+                "success_rate": 100,
                 "status": "success"
             }
         },
@@ -5154,7 +5144,7 @@
                 "total_checks": 45,
                 "passed": 45,
                 "failed": 0,
-                "success_rate": 100.0,
+                "success_rate": 100,
                 "status": "success"
             }
         },
@@ -5320,7 +5310,7 @@
                 "total_checks": 45,
                 "passed": 45,
                 "failed": 0,
-                "success_rate": 100.0,
+                "success_rate": 100,
                 "status": "success"
             }
         },
@@ -5410,9 +5400,7 @@
                     "tax_invoice": [],
                     "bill_to": [],
                     "invoice": [],
-                    "resource_and_bill": [
-                        "Computed line-item total does not match the sum of taxable value and taxes."
-                    ],
+                    "resource_and_bill": [],
                     "note": [],
                     "beneficiary": [],
                     "qr_code": [],
@@ -5484,11 +5472,11 @@
                 }
             },
             "validation_summary": {
-                "total_checks": 45,
+                "total_checks": 44,
                 "passed": 44,
-                "failed": 1,
-                "success_rate": 97.78,
-                "status": "validation_errors"
+                "failed": 0,
+                "success_rate": 100,
+                "status": "success"
             }
         },
         "GWBIAR/FB0034/26": {
@@ -5653,7 +5641,7 @@
                 "total_checks": 45,
                 "passed": 45,
                 "failed": 0,
-                "success_rate": 100.0,
+                "success_rate": 100,
                 "status": "success"
             }
         },
@@ -5819,7 +5807,7 @@
                 "total_checks": 45,
                 "passed": 45,
                 "failed": 0,
-                "success_rate": 100.0,
+                "success_rate": 100,
                 "status": "success"
             }
         },
@@ -5985,7 +5973,7 @@
                 "total_checks": 45,
                 "passed": 45,
                 "failed": 0,
-                "success_rate": 100.0,
+                "success_rate": 100,
                 "status": "success"
             }
         },
@@ -6075,9 +6063,7 @@
                     "tax_invoice": [],
                     "bill_to": [],
                     "invoice": [],
-                    "resource_and_bill": [
-                        "Computed line-item total does not match the sum of taxable value and taxes."
-                    ],
+                    "resource_and_bill": [],
                     "note": [],
                     "beneficiary": [],
                     "qr_code": [],
@@ -6149,11 +6135,11 @@
                 }
             },
             "validation_summary": {
-                "total_checks": 45,
+                "total_checks": 44,
                 "passed": 44,
-                "failed": 1,
-                "success_rate": 97.78,
-                "status": "validation_errors"
+                "failed": 0,
+                "success_rate": 100,
+                "status": "success"
             }
         },
         "GWBIAR/FB0038/26": {
@@ -6318,7 +6304,7 @@
                 "total_checks": 45,
                 "passed": 45,
                 "failed": 0,
-                "success_rate": 100.0,
+                "success_rate": 100,
                 "status": "success"
             }
         },
@@ -6408,9 +6394,7 @@
                     "tax_invoice": [],
                     "bill_to": [],
                     "invoice": [],
-                    "resource_and_bill": [
-                        "Computed line-item total does not match the sum of taxable value and taxes."
-                    ],
+                    "resource_and_bill": [],
                     "note": [],
                     "beneficiary": [],
                     "qr_code": [],
@@ -6482,11 +6466,11 @@
                 }
             },
             "validation_summary": {
-                "total_checks": 45,
+                "total_checks": 44,
                 "passed": 44,
-                "failed": 1,
-                "success_rate": 97.78,
-                "status": "validation_errors"
+                "failed": 0,
+                "success_rate": 100,
+                "status": "success"
             }
         },
         "GWBIAR/FB0040/26": {
@@ -6651,7 +6635,7 @@
                 "total_checks": 45,
                 "passed": 45,
                 "failed": 0,
-                "success_rate": 100.0,
+                "success_rate": 100,
                 "status": "success"
             }
         },
@@ -6817,7 +6801,7 @@
                 "total_checks": 45,
                 "passed": 45,
                 "failed": 0,
-                "success_rate": 100.0,
+                "success_rate": 100,
                 "status": "success"
             }
         },
@@ -6983,7 +6967,7 @@
                 "total_checks": 45,
                 "passed": 45,
                 "failed": 0,
-                "success_rate": 100.0,
+                "success_rate": 100,
                 "status": "success"
             }
         },
@@ -7149,7 +7133,7 @@
                 "total_checks": 45,
                 "passed": 45,
                 "failed": 0,
-                "success_rate": 100.0,
+                "success_rate": 100,
                 "status": "success"
             }
         },
@@ -7315,7 +7299,7 @@
                 "total_checks": 45,
                 "passed": 45,
                 "failed": 0,
-                "success_rate": 100.0,
+                "success_rate": 100,
                 "status": "success"
             }
         },
@@ -7405,9 +7389,7 @@
                     "tax_invoice": [],
                     "bill_to": [],
                     "invoice": [],
-                    "resource_and_bill": [
-                        "Computed line-item total does not match the sum of taxable value and taxes."
-                    ],
+                    "resource_and_bill": [],
                     "note": [],
                     "beneficiary": [],
                     "qr_code": [],
@@ -7479,11 +7461,11 @@
                 }
             },
             "validation_summary": {
-                "total_checks": 45,
+                "total_checks": 44,
                 "passed": 44,
-                "failed": 1,
-                "success_rate": 97.78,
-                "status": "validation_errors"
+                "failed": 0,
+                "success_rate": 100,
+                "status": "success"
             }
         },
         "GWBIAR/FB0046/26": {
@@ -7572,9 +7554,7 @@
                     "tax_invoice": [],
                     "bill_to": [],
                     "invoice": [],
-                    "resource_and_bill": [
-                        "Computed line-item total does not match the sum of taxable value and taxes."
-                    ],
+                    "resource_and_bill": [],
                     "note": [],
                     "beneficiary": [],
                     "qr_code": [],
@@ -7646,11 +7626,11 @@
                 }
             },
             "validation_summary": {
-                "total_checks": 45,
+                "total_checks": 44,
                 "passed": 44,
-                "failed": 1,
-                "success_rate": 97.78,
-                "status": "validation_errors"
+                "failed": 0,
+                "success_rate": 100,
+                "status": "success"
             }
         },
         "GWBIAR/FB0047/26": {
@@ -7815,7 +7795,7 @@
                 "total_checks": 45,
                 "passed": 45,
                 "failed": 0,
-                "success_rate": 100.0,
+                "success_rate": 100,
                 "status": "success"
             }
         },
@@ -7905,9 +7885,7 @@
                     "tax_invoice": [],
                     "bill_to": [],
                     "invoice": [],
-                    "resource_and_bill": [
-                        "Computed line-item total does not match the sum of taxable value and taxes."
-                    ],
+                    "resource_and_bill": [],
                     "note": [],
                     "beneficiary": [],
                     "qr_code": [],
@@ -7979,11 +7957,11 @@
                 }
             },
             "validation_summary": {
-                "total_checks": 45,
+                "total_checks": 44,
                 "passed": 44,
-                "failed": 1,
-                "success_rate": 97.78,
-                "status": "validation_errors"
+                "failed": 0,
+                "success_rate": 100,
+                "status": "success"
             }
         },
         "GWBIAR/FB0049/26": {
@@ -8072,9 +8050,7 @@
                     "tax_invoice": [],
                     "bill_to": [],
                     "invoice": [],
-                    "resource_and_bill": [
-                        "Computed line-item total does not match the sum of taxable value and taxes."
-                    ],
+                    "resource_and_bill": [],
                     "note": [],
                     "beneficiary": [],
                     "qr_code": [],
@@ -8146,11 +8122,11 @@
                 }
             },
             "validation_summary": {
-                "total_checks": 45,
+                "total_checks": 44,
                 "passed": 44,
-                "failed": 1,
-                "success_rate": 97.78,
-                "status": "validation_errors"
+                "failed": 0,
+                "success_rate": 100,
+                "status": "success"
             }
         },
         "GWBIAR/FB0050/26": {
@@ -8315,7 +8291,7 @@
                 "total_checks": 45,
                 "passed": 45,
                 "failed": 0,
-                "success_rate": 100.0,
+                "success_rate": 100,
                 "status": "success"
             }
         }
