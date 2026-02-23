@@ -19,9 +19,9 @@ import os
 from pathlib import Path
 from typing import Dict, Any
 
-from gemini_client.gemini_client import GeminiClient
-from gemini_client.validator import InvoiceValidator
-from gemini_client.helper import pdf_to_png_images, are_pdf_pages_blank
+from gemini_client import GeminiClient
+from validator import InvoiceValidator
+from helper import pdf_to_png_images, are_pdf_pages_blank
 
 
 class InvoiceProcessor:
