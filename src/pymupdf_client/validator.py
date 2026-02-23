@@ -504,7 +504,8 @@ class InvoiceValidator:
                 elif cgst == 0.00 and sgst == 0.00:
                     self.errors["resource_and_bill"].append("IGST, CGST and SGST are all NIL.")
 
-            if total_inr != (taxable_value + cgst + sgst + igst):
+            computed_total = round(taxable_value + cgst + sgst + igst, 2)
+            if round(total_inr, 2) != computed_total:
                 self.errors["resource_and_bill"].append("Computed line-item total does not match the sum of taxable value and taxes.")
             elif total_inr == (taxable_value + cgst + sgst + igst):
                 self.passes["resource_and_bill"].append("Computed line-item total matches the sum of taxable value and taxes.")
