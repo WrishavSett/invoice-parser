@@ -2,8 +2,8 @@
 """
 Invoice Processing and Validation System
 
-Extracts structured data from an invoice PDF using AI, validates it against
-business rules, and writes output files to the specified directory.
+Extracts structured data from an invoice PDF using PyMuPDF, validates it
+against business rules, and writes output files to the specified directory.
 
 Usage:
     python main.py <invoice.pdf> [output_dir]
@@ -20,7 +20,7 @@ import os
 from pathlib import Path
 from typing import Any, Dict
 
-from gemini_client import GeminiClient
+from pdf_client import PyMuPDFClient
 from validator import InvoiceValidator
 from helper import pdf_to_png_images, are_pdf_pages_blank
 
@@ -31,21 +31,14 @@ from helper import pdf_to_png_images, are_pdf_pages_blank
 
 class InvoiceProcessor:
     """
-    Coordinates PDF validation, AI extraction, data validation, and reporting.
+    Coordinates PDF validation, PyMuPDF extraction, data validation, and reporting.
     """
 
-    def __init__(self, api_key: str = None, model_name: str = None):
-        if api_key and model_name:
-            self.gemini_client = GeminiClient(api_key=api_key, model_name=model_name)
-        elif api_key:
-            self.gemini_client = GeminiClient(api_key=api_key)
-        else:
-            self.gemini_client = GeminiClient()
-
+    def __init__(self):
         self.validator = InvoiceValidator()
 
     # ------------------------------------------------------------------
-    # PDF helpers
+    # PDF validation
     # ------------------------------------------------------------------
 
     def _validate_pdf(self, pdf_path: str) -> None:
@@ -62,38 +55,23 @@ class InvoiceProcessor:
         if blank_flags[0]:
             raise ValueError("Invalid PDF: the first page is blank.")
 
-    def _pdf_to_jpg_tmp(self, pdf_path: str) -> str:
-        """Render the first PDF page to a temporary JPEG file."""
-        import tempfile
-        pages = pdf_to_png_images(pdf_path, dpi=200)
-        page_image = pages[0].convert("RGB")
-
-        tmp = tempfile.NamedTemporaryFile(suffix=".jpg", delete=False)
-        tmp.close()
-        page_image.save(tmp.name, format="JPEG", quality=95)
-        return tmp.name
-
     # ------------------------------------------------------------------
     # Core steps
     # ------------------------------------------------------------------
 
     def extract_data(self, pdf_path: str) -> Dict[str, Any]:
-        """Validate the PDF, convert it to JPEG, and extract invoice data."""
+        """Validate the PDF, then extract invoice data directly via PyMuPDF."""
         if not os.path.exists(pdf_path):
             raise FileNotFoundError(f"Invoice PDF not found: {pdf_path}")
 
-        print(f"[1/3] Validating PDF …")
+        print("[1/3] Validating PDF …")
         self._validate_pdf(pdf_path)
         print("      PDF validation passed.")
 
-        jpg_tmp = self._pdf_to_jpg_tmp(pdf_path)
-        try:
-            print(f"[2/3] Extracting data with Gemini …")
-            data = self.gemini_client.extract_invoice_data(jpg_tmp)
-            print("      Extraction complete.")
-        finally:
-            if os.path.exists(jpg_tmp):
-                os.remove(jpg_tmp)
+        print("[2/3] Extracting data with PyMuPDF …")
+        client = PyMuPDFClient(pdf_path)
+        data = client.extract_invoice_data()
+        print("      Extraction complete.")
 
         return data
 
@@ -101,23 +79,27 @@ class InvoiceProcessor:
         """Run all section validators and return combined results."""
         print("[3/3] Validating extracted data …")
 
+        # Single-argument validators
         checks = [
-            ("letter_head",            self.validator.validate_letter_head),
-            ("tax_invoice",            self.validator.validate_tax_invoice),
-            ("bill_to_details",        self.validator.validate_bill_to_details),
-            ("invoice_details",        self.validator.validate_invoice_details),
-            ("note",                   self.validator.validate_note),
-            ("beneficiary_details",    self.validator.validate_beneficiary_details),
-            ("qr_code",                self.validator.validate_qr_code),
-            ("digital_signature",      self.validator.validate_digital_signature),
+            ("letter_head",         self.validator.validate_letter_head),
+            ("tax_invoice",         self.validator.validate_tax_invoice),
+            ("bill_to_details",     self.validator.validate_bill_to_details),
+            ("invoice_details",     self.validator.validate_invoice_details),
+            ("note",                self.validator.validate_note),
+            ("beneficiary_details", self.validator.validate_beneficiary_details),
+            ("qr_code",             self.validator.validate_qr_code),
+            ("digital_signature",   self.validator.validate_digital_signature),
         ]
 
         for key, fn in checks:
             if key in extracted_data:
                 fn(extracted_data[key])
 
-        # resource_and_bill_details needs two arguments
-        if "resource_and_bill_details" in extracted_data and "total_invoice_value" in extracted_data:
+        # resource_and_bill_details requires two arguments
+        if (
+            "resource_and_bill_details" in extracted_data
+            and "total_invoice_value" in extracted_data
+        ):
             self.validator.validate_resource_and_bill_details(
                 extracted_data["resource_and_bill_details"],
                 extracted_data["total_invoice_value"],
@@ -174,8 +156,11 @@ class InvoiceProcessor:
         lines += [
             "",
             "=" * 70,
-            "OVERALL: " + ("ALL VALIDATIONS PASSED ✓" if error_count == 0
-                           else f"{error_count} ISSUE(S) FOUND ✗"),
+            "OVERALL: " + (
+                "ALL VALIDATIONS PASSED ✓"
+                if error_count == 0
+                else f"{error_count} ISSUE(S) FOUND ✗"
+            ),
             "=" * 70,
         ]
 
@@ -199,9 +184,9 @@ class InvoiceProcessor:
         stem = Path(pdf_path).stem
 
         paths = {
-            "extracted_data":      os.path.join(output_dir, f"{stem}_extracted_data.json"),
-            "validation_results":  os.path.join(output_dir, f"{stem}_validation_results.json"),
-            "validation_summary":  os.path.join(output_dir, f"{stem}_validation_summary.txt"),
+            "extracted_data":     os.path.join(output_dir, f"{stem}_extracted_data.json"),
+            "validation_results": os.path.join(output_dir, f"{stem}_validation_results.json"),
+            "validation_summary": os.path.join(output_dir, f"{stem}_validation_summary.txt"),
         }
 
         # Write extracted data
@@ -259,7 +244,7 @@ def main() -> None:
         print("=" * 70)
 
         if error_count > 0:
-            sys.exit(2)   # non-zero exit so CI pipelines can detect failures
+            sys.exit(2)  # non-zero exit so CI pipelines can detect failures
 
     except (FileNotFoundError, ValueError) as e:
         print(f"Error: {e}", file=sys.stderr)

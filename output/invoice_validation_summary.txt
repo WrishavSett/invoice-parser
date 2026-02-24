@@ -1,0 +1,79 @@
+======================================================================
+INVOICE VALIDATION SUMMARY
+======================================================================
+
+  Total checks : 45
+  Passed       : 45
+  Failed       : 0
+  Success rate : 100.0%
+
+----------------------------------------------------------------------
+RESULTS BY SECTION
+----------------------------------------------------------------------
+
+  LETTER HEAD
+    ✓  Company name is present and matches the expected value.
+    ✓  Former company name is present and matches the expected value.
+    ✓  GSTIN is present and format is valid.
+    ✓  Email ID is present and matches the expected value.
+    ✓  Website is present and matches the expected value.
+
+  TAX INVOICE
+    ✓  PAN number is present and format is valid.
+    ✓  TAN number is present and format is valid.
+
+  BILL TO
+    ✓  Company name is present in bill-to details.
+    ✓  Address is present in bill-to details.
+    ✓  GSTIN is present and format is valid in bill-to details.
+    ✓  PAN number is present and format is valid in bill-to details.
+    ✓  TAN number is present and format is valid in bill-to details.
+    ✓  Place of supply is present in bill-to details.
+    ✓  IRN number is present and format is valid in bill-to details.
+
+  INVOICE
+    ✓  Date is present and format is valid in invoice details.
+    ✓  Invoice number is present in invoice details.
+    ✓  Service month is present in invoice details.
+    ✓  Lower TDS certificate number key is present in invoice details.
+
+  RESOURCE AND BILL
+    ✓  Resource and bill details list has line items.
+    ✓  Serial number is present.
+    ✓  Resource name is present.
+    ✓  HSN/SAC is present.
+    ✓  PO number is present.
+    ✓  Bill rate is present.
+    ✓  Ericsson invoice code is present.
+    ✓  Taxable value is present.
+    ✓  CGST is present.
+    ✓  SGST is present.
+    ✓  IGST is present.
+    ✓  Total INR is present.
+    ✓  Total invoice value in INR is present.
+    ✓  Total invoice value in words is present.
+    ✓  IGST is 9356.4 and correctly calculated at 18%. CGST and SGST are NIL.
+    ✓  Computed line-item total matches the sum of taxable value and taxes.
+    ✓  Line-item total INR matches invoice-level total INR.
+    ✓  Invoice total amount in words matches the numeric total INR.
+
+  NOTE
+    ✓  Note point 1 is present and valid.
+    ✓  Note point 2 is present and valid.
+    ✓  Post script is present and valid.
+
+  BENEFICIARY
+    ✓  Beneficiary name is present.
+    ✓  Account number is present.
+    ✓  IFSC code is present.
+    ✓  Country is present.
+
+  QR CODE
+    ✓  QR code is present and valid.
+
+  DIGITAL SIGNATURE
+    ✓  Digital signature is present and valid.
+
+======================================================================
+OVERALL: ALL VALIDATIONS PASSED ✓
+======================================================================
